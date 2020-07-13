@@ -71,6 +71,7 @@ class AppUpgrade {
         _showUpgradeDialog(
             context, appUpgradeInfo.title, appUpgradeInfo.contents,
             apkDownloadUrl: appUpgradeInfo.apkDownloadUrl,
+            md5: appUpgradeInfo.md5,
             force: appUpgradeInfo.force,
             titleStyle: titleStyle,
             contentStyle: contentStyle,
@@ -100,6 +101,7 @@ class AppUpgrade {
     BuildContext context,
     String title,
     List<String> contents, {
+      String md5,
     String apkDownloadUrl,
     bool force = false,
     TextStyle titleStyle,
@@ -131,30 +133,30 @@ class AppUpgrade {
                     borderRadius:
                         BorderRadius.all(Radius.circular(borderRadius))),
                 child: SimpleAppUpgradeWidget(
-                  title: title,
-                  titleStyle: titleStyle,
-                  contents: contents,
-                  contentStyle: contentStyle,
-                  cancelText: cancelText,
-                  cancelTextStyle: cancelTextStyle,
-                  okText: okText,
-                  okTextStyle: okTextStyle,
-                  okBackgroundColors: okBackgroundColors ??
-                      [
-                        Theme.of(context).primaryColor,
-                        Theme.of(context).primaryColor
-                      ],
-                  progressBarColor: progressBarColor,
-                  borderRadius: borderRadius,
-                  downloadUrl: apkDownloadUrl,
-                  force: force,
-                  iosAppId: iosAppId,
-                  appMarketInfo: appMarketInfo,
+                    title: title,
+                    titleStyle: titleStyle,
+                    contents: contents,
+                    contentStyle: contentStyle,
+                    cancelText: cancelText,
+                    cancelTextStyle: cancelTextStyle,
+                    okText: okText,
+                    okTextStyle: okTextStyle,
+                    okBackgroundColors: okBackgroundColors ??
+                        [
+                          Theme.of(context).primaryColor,
+                          Theme.of(context).primaryColor
+                        ],
+                    progressBarColor: progressBarColor,
+                    borderRadius: borderRadius,
+                    downloadUrl: apkDownloadUrl,
+                    md5: md5,
+                    force: force,
+                    iosAppId: iosAppId,
+                    appMarketInfo: appMarketInfo,
                     onCancel: onCancel,
                     onOk: onOk,
                     downloadProgress: downloadProgress,
-                    downloadStatusChange: downloadStatusChange
-                )),
+                    downloadStatusChange: downloadStatusChange)),
           );
         });
   }
@@ -173,6 +175,7 @@ class AppUpgradeInfo {
       {@required this.title,
       @required this.contents,
       this.apkDownloadUrl,
+      this.md5,
       this.force = false});
 
   ///
@@ -194,6 +197,11 @@ class AppUpgradeInfo {
   /// 是否强制升级
   ///
   final bool force;
+
+  ///
+  /// 安装包MD5
+  ///
+  final String md5;
 }
 
 ///

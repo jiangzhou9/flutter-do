@@ -1,5 +1,9 @@
 import 'dart:io';
 
+import 'dart:convert';
+import 'dart:typed_data';
+import 'package:convert/convert.dart';
+import 'package:crypto/crypto.dart' as crypto;
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app_upgrade/flutter_app_upgrade.dart';
@@ -25,6 +29,7 @@ class SimpleAppUpgradeWidget extends StatefulWidget {
       this.progressBarColor,
       this.borderRadius = 10,
       this.downloadUrl,
+        this.md5,
       this.force = false,
       this.iosAppId,
       this.appMarketInfo,
@@ -92,6 +97,11 @@ class SimpleAppUpgradeWidget extends StatefulWidget {
   /// app安装包下载url,没有下载跳转到应用宝等渠道更新
   ///
   final String downloadUrl;
+
+  ///
+  /// app安装包的MD5
+  ///
+  final String md5;
 
   ///
   /// 圆角半径
@@ -316,13 +326,13 @@ class _SimpleAppUpgradeWidget extends State<SimpleAppUpgradeWidget> {
       return;
     }
     String path = await FlutterUpgrade.apkDownloadPath;
-    _downloadApk(widget.downloadUrl, '$path/$_downloadApkName');
+    _downloadApk(widget.downloadUrl, '$path/$_downloadApkName', md5: widget.md5);
   }
 
   ///
   /// 下载apk包
   ///
-  _downloadApk(String url, String path) async {
+  _downloadApk(String url, String path, {String md5}) async {
     if (_downloadStatus == DownloadStatus.start ||
         _downloadStatus == DownloadStatus.downloading ||
         _downloadStatus == DownloadStatus.done) {
@@ -345,13 +355,28 @@ class _SimpleAppUpgradeWidget extends State<SimpleAppUpgradeWidget> {
           //下载完成，跳转到程序安装界面
           _updateDownloadStatus(DownloadStatus.done);
           Navigator.pop(context);
-          FlutterUpgrade.installAppForAndroid(path);
+          //检查MD5
+          if (md5?.isNotEmpty??false) {
+            File file = new File(path);
+            Uint8List str = file.readAsBytesSync();
+            var digest = crypto.md5.convert(str);
+            String md5Str = hex.encode(digest.bytes);
+            if (md5Str == md5) {
+              FlutterUpgrade.installAppForAndroid(path);
+            }
+            else {
+              _updateDownloadStatus(DownloadStatus.error, error: new Exception("文件MD5不正确"));
+            }
+          }
+          else {
+            FlutterUpgrade.installAppForAndroid(path);
+          }
         }
       });
     } catch (e) {
       print('$e');
       _downloadProgress = 0;
-      _updateDownloadStatus(DownloadStatus.error,error: e);
+      _updateDownloadStatus(DownloadStatus.error, error: e);
     }
   }
 
